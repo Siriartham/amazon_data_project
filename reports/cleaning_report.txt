@@ -1,0 +1,156 @@
+#Project Title
+
+E-Commerce Dataset Cleaning and Optimization Using MySQL and Python
+
+#Architecture/Workflow Section
+
+Raw CSV Dataset
+↓
+Python Preprocessing
+↓
+MySQL Import
+↓
+Data Cleaning
+↓
+Validation
+↓
+Query Optimization
+↓
+Final Clean Dataset
+
+
+# Technologies Used
+
+Python
+Pandas
+MySQL
+MySQL Workbench
+VS Code
+
+#Key Learnings
+
+This project provided practical exposure to real-world data quality challenges such as datatype inconsistencies, malformed records, semantic ambiguity, overwritten values, and schema misalignment. The project also improved understanding of database cleaning workflows, validation techniques, NULL handling strategies, query optimization, and indexing concepts within large structured datasets.
+
+# Dataset Problems and Observations
+
+The dataset contained multiple structural and semantic inconsistencies that affected data reliability and analysis quality.
+
+The dataset did not contain a unique identifier column, making it difficult to uniquely distinguish records and detect duplicate entries accurately.
+
+Several rows contained overwritten or misaligned values caused by improper parsing or structural inconsistencies in the dataset. In some rows, values belonging to one column appeared inside unrelated columns.
+
+The delivery_date column contained inconsistent formats. Many rows stored incomplete date information without year values, while some rows contained range-based values such as “Jun - July,” making standard date conversion unreliable.
+
+The shipment column showed severe inconsistency and low analytical value. Most rows contained repetitive values such as “Ships to Bangladesh,” while other rows contained overwritten, NULL, or semantically unclear values.
+
+Based on the observed patterns, the column appeared to represent shipping location information rather than shipment type. Due to its low reliability and limited contribution to analysis, the column was removed from the cleaned dataset.
+
+The free_days column contained mixed semantic information. While many rows contained free-period related values such as “90 days FREE,” several rows included unrelated promotional content, discount information, and corrupted text fragments. Invalid or semantically inconsistent values were replaced with NULL values to improve column consistency.
+
+The real_price and number_of_reviews columns were identified as the most structurally reliable columns in the dataset, with minimal corruption and relatively consistent formatting.
+
+The price(dollar) column contained several inconsistencies, including overwritten values and pricing anomalies. More than 300 rows were identified where the selling price exceeded the original price, indicating potential parsing issues, outdated pricing information, or data corruption.
+
+The product_description column was preserved without major modification because it contained valuable metadata such as product names, brand information, model identifiers, and technical specifications. Although the descriptions were lengthy, aggressive cleaning was avoided to prevent loss of semantic meaning and searchable product information.
+
+Rows containing severe structural corruption, where values overflowed across multiple columns and reliable reconstruction was not possible, were either corrected when logically identifiable or replaced with NULL values to preserve dataset consistency.
+
+# Dataset Validation Summary
+
+The raw dataset initially contained 2766 rows. After the cleaning process, the final cleaned dataset contained 2741 rows. A total of 25 rows were removed due to duplicate entries, severe structural corruption, or overwritten values that could not be reliably reconstructed.
+
+Row reduction was considered acceptable because the removed rows represented low-quality or unreliable data that negatively affected dataset consistency and analytical reliability.
+
+Critical fields such as product_description, price(dollar), and real_price(dollar) did not contain significant NULL value issues after cleaning. NULL values were preserved only in cases where the original data could not be reliably inferred or reconstructed.
+
+Duplicate validation confirmed that no major duplicate records remained in the cleaned dataset.
+
+Price validation showed that although some pricing inconsistencies existed, the differences were generally minimal and did not indicate severe corruption across the dataset.
+
+Outlier inspection did not reveal any extreme or unrealistic pricing anomalies that would significantly affect analysis quality.
+
+NULL values were intentionally preserved in uncertain or corrupted cases to maintain data integrity and avoid introducing inaccurate information through assumptions or artificial replacements.
+
+# Optimization and Query Analysis
+
+Query testing was performed on both the raw dataset and the cleaned dataset to evaluate analytical usability and query reliability.
+
+In the raw dataset, several important columns such as price(dollar) and real_price(dollar) were stored as string values instead of numeric datatypes. Due to this issue, numerical operations such as sorting, comparison, and aggregation produced incorrect or unreliable results.
+
+After datatype standardization in the cleaned dataset, analytical queries produced accurate outputs with significantly improved reliability.
+
+The query used to identify the most expensive product executed successfully in approximately 0.016 seconds on the cleaned dataset. In the raw dataset, incorrect datatype storage caused price values to be interpreted as strings, resulting in invalid sorting behavior.
+
+The query used to identify products with the highest number of reviews executed successfully in approximately 0.015 seconds on the cleaned dataset. In the raw dataset, inconsistent formatting and missing values reduced query reliability.
+
+NULL value standardization improved query accuracy. In the raw dataset, several missing values were stored as blank strings or textual placeholders such as “None” instead of proper NULL values, causing filtering operations to behave inconsistently.
+
+Queries identifying products where the selling price exceeded the original price executed successfully in the cleaned dataset because numerical datatype conversion enabled proper comparison operations. In the raw dataset, price comparisons were unreliable due to string-based storage formats.
+
+Overall, the cleaning and datatype standardization process significantly improved dataset consistency, query accuracy, and analytical usability.
+
+# Final Cleaned Table Structure
+product_description → TEXT
+price_dollar → FLOAT
+number_of_reviews → INT
+real_price_dollar → FLOAT
+free_days → TEXT
+delivery_date → TEXT
+
+# Real SQL Query Examples
+SELECT *
+FROM amazon_cleaning.`raw_prdoucts`
+WHERE `Price(Dollar)` IS NULL OR
+`Number of  reviews` IS NULL OR
+`Real Price` IS NULL or
+`Free days` IS NULL OR
+`Delivery Date` IS NULL ;
+
+SELECT *
+FROM amazon_cleaning.`amazon_audio_video`
+WHERE `Price(Dollar)` IS NULL OR
+`Number of  reviews` IS NULL OR
+`Real Price` IS NULL or
+`Free days` IS NULL OR
+`Delivery Date` IS NULL
+
+SELECT *
+FROM amazon_cleaning.`raw_prdoucts` 
+WHERE `Price(Dollar)` > `Real Price`;
+
+SELECT  MAX(`Real Price`) 
+FROM amazon_cleaning.`raw_prdoucts` ;
+
+SELECT ` Product Description`
+FROM amazon_cleaning.`raw_prdoucts` 
+WHERE `Real Price` = 2994.0100;
+
+SELECT  MAX(`Number of  reviews`) 
+FROM amazon_cleaning.`raw_prdoucts` ;
+
+# Indexing Experiments
+
+Indexing experiments were performed to improve query execution efficiency and data retrieval performance within the cleaned dataset.
+
+Without indexing, the database engine performs full table scans to locate required records, which increases query execution time and reduces scalability for large datasets. As dataset size grows, searching, filtering, and sorting operations become increasingly expensive and time-consuming.
+
+Indexes help optimize data access by allowing the database to quickly locate relevant rows without scanning the entire table. This significantly improves the performance of frequently executed analytical queries such as product searches, price filtering, and review-based sorting.
+
+The indexing phase demonstrated how proper database optimization improves retrieval speed, reduces query complexity, and enhances scalability for large e-commerce datasets.
+
+
+# Future Improvements Section
+
+Future improvements may include automated anomaly detection techniques for identifying corrupted records dynamically, NLP-based product normalization for shortening and standardizing product descriptions, scalable ETL pipeline development for handling multiple datasets automatically, and dashboard integration for interactive visualization and monitoring.
+
+# Final Conclusion 
+
+The project successfully transformed a structurally inconsistent and partially corrupted e-commerce dataset into a cleaner, more reliable, and analytically usable database system using MySQL and Python-based preprocessing techniques.
+
+During the cleaning process, multiple data quality issues were identified, including overwritten values, column misalignment, inconsistent datatypes, malformed records, duplicate entries, unreliable shipment information, and semantically inconsistent column values. Critical validation and inspection steps were performed to distinguish reliable business information from corrupted or low-value data.
+
+The dataset was cleaned through datatype standardization, duplicate removal, NULL value handling, anomaly detection, structural correction, and selective column preservation. Columns containing valuable business metadata, such as product_description, were preserved to maintain semantic richness, while low-value or heavily inconsistent data was either corrected, standardized, replaced with NULL values, or removed when necessary.
+
+Validation and query testing confirmed that the cleaned dataset produced significantly more reliable analytical outputs compared to the raw dataset. Numerical queries involving pricing and reviews became accurate after datatype conversion and structural correction. The project also demonstrated the importance of database optimization techniques such as indexing for improving query execution efficiency and scalability.
+
+Overall, the project highlighted the practical challenges of real-world data cleaning, including schema inconsistencies, parsing corruption, and unreliable scraped data. The final cleaned dataset achieved improved consistency, better analytical reliability, enhanced query usability, and a stronger foundation for future large-scale data analysis and database optimization tasks.
